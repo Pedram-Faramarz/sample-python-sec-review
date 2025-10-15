@@ -1,6 +1,7 @@
 # vulnerable auth implementation
 users_db = {}
 
+
 def register_user(username, password):
     
     users_db[username] = {'password': password}
