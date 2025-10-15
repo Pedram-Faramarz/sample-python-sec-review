@@ -1,8 +1,15 @@
 from flask import Flask, request, session, redirect, url_for, render_template_string
 from auth import register_user, login_user
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'dev-secret-key'  
+# load secret key from environment variable
+app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev-fallback')  
+
+
 
 @app.route('/')
 def index():
@@ -13,9 +20,11 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
+        username = request.form['username'].strip()
         password = request.form['password']
-      
+        # simple validation: require some minimum length
+        if not username or len(password) < 8:
+            return 'Invalid input', 400
         register_user(username, password)
         return redirect(url_for('index'))
     return render_template_string('''
@@ -29,12 +38,12 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
+        username = request.form['username'].strip()
         password = request.form['password']
         if login_user(username, password):
-            session['user'] = username  
+            session['user'] = username
             return redirect(url_for('index'))
-        return 'Login failed'
+        return 'Login failed', 401
     return render_template_string('''
         <form method="post">
             Username: <input name="username"><br>
@@ -44,4 +53,5 @@ def login():
     ''')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # For local dev only. When deploying, use a WSGI server and disable debug.
+    app.run()
