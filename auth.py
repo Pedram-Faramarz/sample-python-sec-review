@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Very small, illustrative in-memory store (do not use in production)
+
 users_db = {}
 
 def hash_password(plain_password: str) -> bytes:
